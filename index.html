@@ -1,0 +1,217 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SyllabusSOS | Study Smarter</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>📚 SyllabusSOS</h1>
+    <p>Your exams. Your plan. Your progress.</p>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h2>Take control of your exams.</h2>
+      <p>Plan your semester, manage backlogs and
+         prepare one topic at a time.</p>
+      <button id="startBtn">Start Planning</button>
+    </section>
+
+    <section class="stats">
+      <div class="card">
+        <h3>Subjects</h3>
+        <p id="subjectCount">0</p>
+      </div>
+      <div class="card">
+        <h3>Topics Completed</h3>
+        <p id="completedCount">0</p>
+      </div>
+      <div class="card">
+        <h3>Backlogs</h3>
+        <p id="backlogCount">0</p>
+      </div>
+    </section>
+
+    <section id="planner">
+      <h2>Add a Subject</h2>
+      <form id="subjectForm">
+        <input id="subjectName" type="text"
+          placeholder="Subject name" required>
+
+        <input id="examDate" type="date" required>
+
+        <label>
+          <input id="isBacklog" type="checkbox">
+          This subject is a backlog
+        </label>
+
+        <button type="submit">Add Subject</button>
+      </form>
+
+     <h2>Your Subjects</h2>
+<div id="subjectList">
+  <p>No subjects added yet. Start by adding one!</p>
+</div>
+
+<section id="topicSection">
+  <h2>Syllabus Topic Tracker</h2>
+
+  <form id="topicForm">
+    <select id="topicSubject" required>
+      <option value="">Choose a subject</option>
+    </select>
+
+    <input
+      id="topicName"
+      type="text"
+      placeholder="Enter syllabus topic"
+      required
+    />
+
+    <button type="submit">Add Topic</button>
+  </form>
+
+  <div class="progress-container">
+    <p id="progressText">Overall preparation: 0%</p>
+    <progress id="overallProgress" value="0" max="100"></progress>
+  </div>
+
+  <div id="topicList">
+    <p>Add a subject and topic to get started.</p>
+  </div>
+</section>
+    </section>
+
+<!-- Progress Dashboard -->
+<section id="progressDashboard">
+  <h2>📊 Progress Dashboard</h2>
+
+  <div class="dashboard-grid">
+    <div class="dashboard-card">
+      <h3>Total Topics</h3>
+      <p id="dashboardTotal">0</p>
+    </div>
+
+    <div class="dashboard-card">
+      <h3>Completed</h3>
+      <p id="dashboardCompleted">0</p>
+    </div>
+
+    <div class="dashboard-card">
+      <h3>Pending</h3>
+      <p id="dashboardPending">0</p>
+    </div>
+
+    <div class="dashboard-card">
+      <h3>Backlog Subjects</h3>
+      <p id="dashboardBacklogs">0</p>
+    </div>
+  </div>
+
+  <label for="dashboardProgress">Overall syllabus progress</label>
+  <progress id="dashboardProgress" value="0" max="100"></progress>
+  <p id="dashboardProgressText">0% completed</p>
+</section>
+
+<!-- Revision Tracker -->
+<section id="revisionSection">
+  <h2>📝 Revision Tracker</h2>
+  <p>Mark topics when you have revised them.</p>
+
+  <div id="revisionSummary">No topics available yet.</div>
+  <div id="revisionList"></div>
+</section>
+
+<section id="recommendationsSection">
+  <h2>🎯 Today's Study Priorities</h2>
+  <p id="recommendationSummary">
+    Your personalized study recommendations will appear here.
+  </p>
+  <div id="recommendationList"></div>
+</section>
+
+<!-- Weekly Study Report -->
+<section id="weeklyReportSection">
+  <h2>📅 Weekly Study Report</h2>
+  <p>Review your study progress and set a goal for the week.</p>
+
+  <div class="weekly-report-grid">
+    <div class="weekly-report-card">
+      <h3>Topics Completed</h3>
+      <p id="weeklyCompleted">0</p>
+    </div>
+
+    <div class="weekly-report-card">
+      <h3>Topics Revised</h3>
+      <p id="weeklyRevised">0</p>
+    </div>
+  </div>
+
+  <form id="weeklyGoalForm">
+    <label for="weeklyGoal">Weekly topic completion goal</label>
+    <input
+      type="number"
+      id="weeklyGoal"
+      min="1"
+      max="200"
+      value="10"
+      required
+    />
+    <button type="submit">Save Weekly Goal</button>
+  </form>
+
+  <p id="weeklyGoalStatus">Weekly goal: 10 topics</p>
+  <p id="weeklyReportMessage"></p>
+
+  <button type="button" id="downloadWeeklyReport">
+    Download Weekly Report
+  </button>
+</section>
+
+  </main>
+
+<section id="timetableSection">
+  <h2>Automatic Study Planner</h2>
+  <p>
+    Build a daily study plan using your exams, backlogs
+    and unfinished syllabus topics.
+  </p>
+
+  <form id="timetableForm">
+    <label for="studyHours">
+      Daily study hours
+    </label>
+
+    <input
+      id="studyHours"
+      type="number"
+      min="1"
+      max="12"
+      step="1"
+      value="4"
+      required
+    />
+
+    <button type="submit">
+      Generate My Timetable
+    </button>
+  </form>
+
+  <p id="timetableSummary">
+    Your timetable has not been generated yet.
+  </p>
+
+  <div id="timetableResults"></div>
+</section>
+
+  <footer>
+    <p>Built for students, by students | SyllabusSOS</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

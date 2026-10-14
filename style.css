@@ -410,3 +410,159 @@ footer {
     padding: 16px;
   }
 }
+
+
+#backupSection {
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+  margin-top: 24px;
+}
+
+#backupSection h2 {
+  margin-top: 0;
+}
+
+#backupSection button {
+  padding: 10px 16px;
+  margin: 8px 8px 8px 0;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.restore-backup {
+  display: grid;
+  gap: 10px;
+  max-width: 420px;
+  margin-top: 20px;
+}
+
+#backupStatus {
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+  #backupSection {
+    padding: 16px;
+  }
+}
+
+
+#dailyChecklistSection {
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+  margin-top: 24px;
+}
+
+#dailyChecklistSection h2 {
+  margin-top: 0;
+}
+
+.daily-checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #dce2f1;
+  border-radius: 10px;
+}
+
+.daily-checklist-item label {
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+
+.daily-checklist-item input {
+  width: 18px;
+  height: 18px;
+}
+
+.daily-checklist-item.is-complete label {
+  text-decoration: line-through;
+  opacity: 0.65;
+}
+
+#dailyChecklistProgress {
+  font-weight: bold;
+  margin-bottom: 0;
+}
+
+@media (max-width: 600px) {
+  #dailyChecklistSection {
+    padding: 16px;
+  }
+}
+
+
+#studyStreakSection {
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+  margin-top: 24px;
+}
+
+.streak-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin: 20px 0;
+}
+
+.streak-card {
+  background: #f3f5fb;
+  border: 1px solid #dce2f1;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.streak-card h3 {
+  font-size: 14px;
+  margin-top: 0;
+}
+
+.streak-card p {
+  font-size: 26px;
+  font-weight: bold;
+  color: #354fc5;
+  margin-bottom: 0;
+}
+
+@media (max-width: 600px) {
+  #studyStreakSection {
+    padding: 16px;
+  }
+}
+
+
+#examCountdownSection {
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+  margin-top: 24px;
+}
+
+.exam-countdown-card {
+  background: #f3f5fb;
+  border: 1px solid #dce2f1;
+  border-radius: 12px;
+  padding: 18px;
+  margin-top: 12px;
+}
+
+.exam-countdown-card h3 {
+  margin-top: 0;
+}
+
+.exam-countdown-days {
+  font-size: 28px;
+  font-weight: bold;
+  color: #354fc5;
+}
+
+.exam-countdown-card p {
+  line-height: 1.5;
+}

@@ -1,0 +1,96 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SyllabusSOS - Student Login</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: #f4f6fb;
+      font-family: Arial, sans-serif;
+      color: #202938;
+    }
+
+    .card {
+      width: min(360px, calc(100% - 48px));
+      padding: 28px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 8px 30px #00000012;
+    }
+
+    h1 { margin-top: 0; }
+    p { color: #64748b; line-height: 1.5; }
+
+    input, button {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 12px;
+      margin-top: 12px;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    input { border: 1px solid #cbd5e1; }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      background: #2563eb;
+      color: white;
+      font-weight: bold;
+    }
+
+    button.secondary {
+      background: #e8eefc;
+      color: #1d4ed8;
+    }
+
+    #message {
+      overflow-wrap: anywhere;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>SyllabusSOS</h1>
+    <p>Sign in or create your student account.</p>
+
+    <form id="auth-form">
+      <input
+        id="email"
+        type="email"
+        placeholder="Email address"
+        autocomplete="email"
+        required
+      >
+
+      <input
+        id="password"
+        type="password"
+        placeholder="Password (at least 8 characters)"
+        autocomplete="current-password"
+        minlength="8"
+        required
+      >
+
+      <button type="submit">Sign in</button>
+      <button type="button" class="secondary" id="signup">
+        Create account
+      </button>
+    </form>
+
+    <p id="message" role="status" aria-live="polite"></p>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script src="auth.js"></script>
+</body>
+</html>

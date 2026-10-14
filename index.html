@@ -172,7 +172,40 @@
   </button>
 </section>
 
+
+<section id="backupSection">
+  <h2>💾 Backup & Restore</h2>
+  <p>Download a backup of your SyllabusSOS data or restore it later.</p>
+
+  <button type="button" id="exportBackupBtn">
+    Download Backup
+  </button>
+
+  <div class="restore-backup">
+    <label for="importBackupFile">Restore from backup file (.json)</label>
+    <input
+      type="file"
+      id="importBackupFile"
+      accept=".json,application/json"
+    />
+    <button type="button" id="importBackupBtn">
+      Restore Backup
+    </button>
+  </div>
+
+  <p id="backupStatus" role="status"></p>
+</section>
+
   </main>
+  
+<section id="examCountdownSection">
+  <h2>⏳ Exam Countdown</h2>
+  <div id="examCountdownContent">
+    <p>Add a subject and exam date to see your countdown.</p>
+  </div>
+</section>
+
+
 
 <section id="timetableSection">
   <h2>Automatic Study Planner</h2>
@@ -206,12 +239,49 @@
   </p>
 
   <div id="timetableResults"></div>
+
 </section>
 
-  <footer>
+<section id="dailyChecklistSection">
+  <h2>✅ Daily Study Checklist</h2>
+  <p>Select the topics you plan to study today, then mark them complete as you finish.</p>
+
+  <div id="dailyChecklist">
+    <p>Your daily checklist will appear here.</p>
+  </div>
+
+  <p id="dailyChecklistProgress">0 tasks completed today.</p>
+</section>
+
+
+<section id="studyStreakSection">
+  <h2>🔥 Study Streak</h2>
+  <p>Build a daily study habit by completing at least one planned task each day.</p>
+
+  <div class="streak-cards">
+    <div class="streak-card">
+      <h3>Current Streak</h3>
+      <p id="currentStreak">0 days</p>
+    </div>
+
+    <div class="streak-card">
+      <h3>Best Streak</h3>
+      <p id="bestStreak">0 days</p>
+    </div>
+  </div>
+
+  <p id="streakMessage">Complete a planned task to start your streak!</p>
+</section>
+
+<footer>
+
+
     <p>Built for students, by students | SyllabusSOS</p>
   </footer>
 
-  <script src="script.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="cloud-sync.js"></script>
+<script src="script.js"></script>
 </body>
 </html>

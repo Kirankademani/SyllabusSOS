@@ -175,6 +175,9 @@ function renderSubjects() {
 
   // Topic-completion tracking will be added in a later step.
   completedCount.textContent = "0";
+  if (typeof renderExamCountdown === "function") {
+  renderExamCountdown();
+}
 }
 
 subjectForm.addEventListener("submit", (event) => {
@@ -1158,3 +1161,450 @@ downloadWeeklyReportButton.addEventListener("click", () => {
 });
 
 renderWeeklyReport();
+
+
+const backupStorageKeys = [
+  "syllabussos_subjects",
+  "syllabussos_topics",
+  "syllabussos_revisions",
+  "syllabussos_weekly_goal",
+  "syllabussos_weekly_activity"
+];
+
+const exportBackupBtn = document.getElementById("exportBackupBtn");
+const importBackupBtn = document.getElementById("importBackupBtn");
+const importBackupFile = document.getElementById("importBackupFile");
+const backupStatus = document.getElementById("backupStatus");
+
+if (
+  exportBackupBtn &&
+  importBackupBtn &&
+  importBackupFile &&
+  backupStatus
+) {
+  exportBackupBtn.addEventListener("click", () => {
+    try {
+      const backup = {
+        app: "SyllabusSOS",
+        version: 1,
+        createdAt: new Date().toISOString(),
+        data: {}
+      };
+
+      backupStorageKeys.forEach((key) => {
+        const value = localStorage.getItem(key);
+        backup.data[key] = value === null ? null : JSON.parse(value);
+      });
+
+      const blob = new Blob(
+        [JSON.stringify(backup, null, 2)],
+        { type: "application/json" }
+      );
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = `SyllabusSOS-Backup-${new Date()
+        .toISOString()
+        .slice(0, 10)}.json`;
+
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+
+      backupStatus.textContent = "Backup downloaded successfully.";
+    } catch (error) {
+      console.error("Backup export failed:", error);
+      backupStatus.textContent =
+        "Could not create the backup. Your existing data has not been changed.";
+    }
+  });
+
+  importBackupBtn.addEventListener("click", async () => {
+    const file = importBackupFile.files[0];
+
+    if (!file) {
+      backupStatus.textContent = "Please select a backup JSON file first.";
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      backupStatus.textContent = "The backup file must be smaller than 5 MB.";
+      return;
+    }
+
+    if (!confirm(
+      "Restoring will replace your current SyllabusSOS data. " +
+      "Download a backup of your current data first. Continue?"
+    )) {
+      return;
+    }
+
+    let backup;
+
+    try {
+      backup = JSON.parse(await file.text());
+
+      if (
+        backup.app !== "SyllabusSOS" ||
+        backup.version !== 1 ||
+        !backup.data ||
+        typeof backup.data !== "object" ||
+        Array.isArray(backup.data)
+      ) {
+        throw new Error("Invalid backup format.");
+      }
+
+      backupStorageKeys.forEach((key) => {
+        if (!Object.prototype.hasOwnProperty.call(backup.data, key)) {
+          throw new Error(`Missing data for ${key}`);
+        }
+
+        const value = backup.data[key];
+
+        if (value !== null) {
+          JSON.stringify(value);
+        }
+      });
+
+      if (
+        !Array.isArray(backup.data.syllabussos_subjects) ||
+        !Array.isArray(backup.data.syllabussos_topics) ||
+        !backup.data.syllabussos_revisions ||
+        typeof backup.data.syllabussos_revisions !== "object" ||
+        Array.isArray(backup.data.syllabussos_revisions)
+      ) {
+        throw new Error("Backup data has an invalid structure.");
+      }
+    } catch (error) {
+      console.error("Backup validation failed:", error);
+      backupStatus.textContent =
+        "Invalid backup file. Your current data has not been changed.";
+      return;
+    }
+
+    const previousValues = {};
+
+    try {
+      backupStorageKeys.forEach((key) => {
+        previousValues[key] = localStorage.getItem(key);
+      });
+
+      backupStorageKeys.forEach((key) => {
+        const value = backup.data[key];
+
+        if (value === null) {
+          localStorage.removeItem(key);
+        } else {
+          localStorage.setItem(key, JSON.stringify(value));
+        }
+      });
+
+      backupStatus.textContent =
+        "Backup restored successfully. Reloading SyllabusSOS…";
+
+      window.location.reload();
+    } catch (error) {
+      console.error("Backup restore failed:", error);
+
+      try {
+        backupStorageKeys.forEach((key) => {
+          const previous = previousValues[key];
+
+          if (previous === null || previous === undefined) {
+            localStorage.removeItem(key);
+          } else {
+            localStorage.setItem(key, previous);
+          }
+        });
+      } catch (rollbackError) {
+        console.error("Could not fully roll back the restore:", rollbackError);
+      }
+
+      backupStatus.textContent =
+        "Restore failed. Your previous data was restored where possible.";
+    }
+  });
+}
+
+
+const DAILY_CHECKLIST_KEY = "syllabussos_daily_checklist";
+
+function renderDailyChecklist() {
+  const checklist = document.getElementById("dailyChecklist");
+  const progress = document.getElementById("dailyChecklistProgress");
+
+  if (!checklist || !progress) return;
+
+  const today = new Date();
+  const todayKey =
+    `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+
+  let saved = {};
+
+  try {
+    saved = JSON.parse(localStorage.getItem(DAILY_CHECKLIST_KEY)) || {};
+  } catch {
+    saved = {};
+  }
+
+  if (saved.date !== todayKey) {
+    saved = { date: todayKey, selected: [], completed: [] };
+  }
+
+  if (!Array.isArray(saved.selected)) saved.selected = [];
+  if (!Array.isArray(saved.completed)) saved.completed = [];
+
+  const availableTopics = topics.filter((topic) => {
+    const subject = subjects.find((item) => item.id === topic.subjectId);
+    return Boolean(subject) && !topic.completed;
+  });
+
+  checklist.replaceChildren();
+
+  if (availableTopics.length === 0) {
+    const message = document.createElement("p");
+    message.textContent =
+      "No pending topics available. Add topics or enjoy your progress!";
+    checklist.appendChild(message);
+  }
+
+  availableTopics.forEach((topic) => {
+    const subject = subjects.find((item) => item.id === topic.subjectId);
+    const item = document.createElement("div");
+    item.className = "daily-checklist-item";
+
+    const select = document.createElement("input");
+    select.type = "checkbox";
+    select.checked = saved.selected.includes(topic.id);
+    select.setAttribute("aria-label", `Plan ${topic.name} for today`);
+
+    const label = document.createElement("label");
+    label.textContent = `${topic.name} — ${subject.name}`;
+
+    select.addEventListener("change", () => {
+      if (select.checked) {
+        if (!saved.selected.includes(topic.id)) saved.selected.push(topic.id);
+      } else {
+        saved.selected = saved.selected.filter((id) => id !== topic.id);
+        saved.completed = saved.completed.filter((id) => id !== topic.id);
+      }
+
+      saveDailyChecklist(saved);
+      renderDailyChecklist();
+    });
+
+    item.append(select, label);
+
+    if (saved.selected.includes(topic.id)) {
+      const done = document.createElement("input");
+      done.type = "checkbox";
+      done.checked = saved.completed.includes(topic.id);
+      done.setAttribute("aria-label", `Mark ${topic.name} complete for today`);
+
+      done.addEventListener("change", () => {
+        if (done.checked) {
+          if (!saved.completed.includes(topic.id)) {
+            saved.completed.push(topic.id);
+          }
+        } else {
+          saved.completed = saved.completed.filter((id) => id !== topic.id);
+        }
+
+        saveDailyChecklist(saved);
+        if (done.checked) {
+  recordStudyDay();
+}
+        renderDailyChecklist();
+      });
+
+      const doneLabel = document.createElement("span");
+      doneLabel.textContent = "Done";
+      item.append(done, doneLabel);
+
+      if (done.checked) item.classList.add("is-complete");
+    }
+
+    checklist.appendChild(item);
+  });
+
+  const selectedCount = saved.selected.length;
+  const completedCount = saved.completed.filter((id) =>
+    saved.selected.includes(id)
+  ).length;
+
+  progress.textContent =
+    `${completedCount} of ${selectedCount} planned tasks completed today.`;
+}
+
+function saveDailyChecklist(data) {
+  try {
+    localStorage.setItem(DAILY_CHECKLIST_KEY, JSON.stringify(data));
+  } catch (error) {
+    console.error("Could not save daily checklist:", error);
+    alert("Could not save the checklist. Check your browser storage.");
+  }
+}
+
+renderDailyChecklist();
+
+
+
+const STUDY_STREAK_KEY = "syllabussos_study_streak";
+
+function getLocalDateKey(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function loadStudyStreak() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STUDY_STREAK_KEY));
+    if (saved && Array.isArray(saved.studyDays)) return saved;
+  } catch (error) {
+    console.error("Could not load study streak:", error);
+  }
+
+  return { studyDays: [] };
+}
+
+function renderStudyStreak() {
+  const currentElement = document.getElementById("currentStreak");
+  const bestElement = document.getElementById("bestStreak");
+  const messageElement = document.getElementById("streakMessage");
+
+  if (!currentElement || !bestElement || !messageElement) return;
+
+  const data = loadStudyStreak();
+  const days = [...new Set(data.studyDays)].sort();
+  const today = getLocalDateKey(new Date());
+
+  let current = 0;
+  const checkDate = new Date();
+  checkDate.setHours(0, 0, 0, 0);
+
+  // A streak is active today or if yesterday was the last study day.
+  const yesterday = new Date(checkDate);
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  let cursor = days.includes(today)
+    ? new Date(checkDate)
+    : yesterday;
+
+  if (days.includes(getLocalDateKey(cursor))) {
+    while (days.includes(getLocalDateKey(cursor))) {
+      current++;
+      cursor.setDate(cursor.getDate() - 1);
+    }
+  }
+
+  let best = 0;
+  let run = 0;
+  let previousDate = null;
+
+  for (const day of days) {
+    const date = new Date(`${day}T00:00:00`);
+    const difference = previousDate
+      ? Math.round((date - previousDate) / 86400000)
+      : 0;
+
+    run = previousDate && difference === 1 ? run + 1 : 1;
+    best = Math.max(best, run);
+    previousDate = date;
+  }
+
+  currentElement.textContent = `${current} day${current === 1 ? "" : "s"}`;
+  bestElement.textContent = `${Math.max(best, current)} day${Math.max(best, current) === 1 ? "" : "s"}`;
+
+  if (days.includes(today)) {
+    messageElement.textContent = "Amazing! You've studied today. Keep your streak alive!";
+  } else if (current > 0) {
+    messageElement.textContent = "Your streak is active. Complete a task today to keep it going!";
+  } else {
+    messageElement.textContent = "Complete a planned task today to start or restart your streak!";
+  }
+}
+
+function recordStudyDay() {
+  const data = loadStudyStreak();
+  const today = getLocalDateKey(new Date());
+
+  if (!data.studyDays.includes(today)) {
+    data.studyDays.push(today);
+
+    try {
+      localStorage.setItem(STUDY_STREAK_KEY, JSON.stringify(data));
+    } catch (error) {
+      console.error("Could not save study streak:", error);
+    }
+  }
+
+  renderStudyStreak();
+}
+
+renderStudyStreak();
+
+
+function renderExamCountdown() {
+  const container = document.getElementById("examCountdownContent");
+  if (!container) return;
+
+  container.replaceChildren();
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const upcoming = subjects
+    .map((subject) => {
+      const examDate = new Date(`${subject.examDate}T00:00:00`);
+      const daysLeft = Math.round(
+        (examDate.getTime() - today.getTime()) / 86400000
+      );
+
+      const pendingCount = topics.filter(
+        (topic) =>
+          topic.subjectId === subject.id &&
+          !topic.completed
+      ).length;
+
+      return { subject, daysLeft, pendingCount };
+    })
+    .filter((item) => item.daysLeft >= 0)
+    .sort((a, b) => a.daysLeft - b.daysLeft);
+
+  if (upcoming.length === 0) {
+    const message = document.createElement("p");
+    message.textContent =
+      "No upcoming exams found. Add or update an exam date in your subjects.";
+    container.appendChild(message);
+    return;
+  }
+
+  upcoming.forEach(({ subject, daysLeft, pendingCount }) => {
+    const card = document.createElement("div");
+    card.className = "exam-countdown-card";
+
+    const heading = document.createElement("h3");
+    heading.textContent =
+      `${subject.name}${subject.isBacklog ? " — BACKLOG" : ""}`;
+
+    const countdown = document.createElement("p");
+    countdown.className = "exam-countdown-days";
+    countdown.textContent =
+      daysLeft === 0
+        ? "Exam today!"
+        : `${daysLeft} day${daysLeft === 1 ? "" : "s"} left`;
+
+    const pending = document.createElement("p");
+    pending.textContent = `${pendingCount} unfinished topic(s)`;
+
+    card.append(heading, countdown, pending);
+    container.appendChild(card);
+  });
+}
+
+renderExamCountdown();

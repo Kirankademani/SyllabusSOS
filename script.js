@@ -988,6 +988,9 @@ const downloadWeeklyReportButton =
   document.getElementById("downloadWeeklyReport");
 
 let weeklyGoal = 10;
+
+localStorage.removeItem(WEEKLY_ACTIVITY_KEY);
+
 let weeklyActivity = {};
 
 try {
@@ -1001,13 +1004,7 @@ try {
     localStorage.getItem(WEEKLY_ACTIVITY_KEY) || "{}"
   );
 
-  if (
-    storedActivity &&
-    typeof storedActivity === "object" &&
-    !Array.isArray(storedActivity)
-  ) {
-    weeklyActivity = storedActivity;
-  }
+ weeklyActivity = {};
 } catch (error) {
   console.warn("Weekly report data could not be loaded.", error);
 }
